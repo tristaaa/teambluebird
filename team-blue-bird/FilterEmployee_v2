@@ -1,0 +1,104 @@
+from datetime import datetime
+from pyspark.sql.functions import *
+import os
+import time
+
+def createNewForm(rows):
+    consecDays = 1
+    curRecord = 0
+    upperBound = 2
+    lowerBound = 1
+    # row Structure: [MacId, [data row]]
+    for row in rows[1]:
+        if(curRecord == 0):
+            curRecord = row
+            continue
+        rowDatetime = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S')
+        curDatetime = datetime.strptime(curRecord[0], '%Y-%m-%d %H:%M:%S')
+        diff = rowDatetime - curDatetime
+        if diff.days >= upperBound:
+            curRecord = row
+            consecDays = 1
+            continue
+        if diff.days < upperBound and diff.days >= lowerBound:
+            consecDays += 1
+            curRecord = row
+            if consecDays >= 4:
+                # print('row success')
+                return rows[0]
+    # return
+
+def test(rows):
+    print('Start Row')
+    print(rows[1])
+    # for each in rows[1]:
+    #     print(each)
+    return
+
+def task(indir):
+    sc = SparkContext('local[*]',
+                      'task1')
+    sc.setLogLevel('ERROR')
+    a, b, c = list(os.walk(indir))[0]
+    infiles = [os.path.join(a, f) for f in c]
+    lines0 = sc.textFile(infiles[0])
+    lines1 = sc.textFile(infiles[1])
+    lines2 = sc.textFile(infiles[2])
+    lines3 = sc.textFile(infiles[3])
+    lines4 = sc.textFile(infiles[4])
+    lines5 = sc.textFile(infiles[5])
+    lines6 = sc.textFile(infiles[6])
+
+    lines = lines0.union(lines1).union(lines2).union(lines3).union(lines4).union(lines5).union(lines6)
+    # lines = sc.textFile(indir)
+    q0 = lines.map(lambda x: x.split(',')) \
+        .map(lambda x: (x[3], (x[6] + ' ' + x[7], x[4], x[5], x[2], x[0]))) \
+        .groupByKey() \
+        .map(lambda x: [x[0], list(x[1])]) \
+        .sortBy(lambda x: (x[1][0]))\
+        .map(createNewForm) \
+        .filter(lambda x: x is not None) \
+        .collect()
+
+    return q0
+
+def simple_task(indir):
+    sc = SparkContext('local[*]',
+                      'task1')
+    sc.setLogLevel('ERROR')
+    a, b, c = list(os.walk(indir))[0]
+    infiles = [os.path.join(a, f) for f in c]
+    lines0 = sc.textFile(infiles[0])
+    lines1 = sc.textFile(infiles[1])
+    lines2 = sc.textFile(infiles[2])
+    lines3 = sc.textFile(infiles[3])
+    lines4 = sc.textFile(infiles[4])
+    lines5 = sc.textFile(infiles[5])
+    lines6 = sc.textFile(infiles[6])
+
+    lines = lines0.union(lines1).union(lines2).union(lines3).union(lines4).union(lines5).union(lines6)
+    # lines = sc.textFile(indir)
+    q0 = lines.map(lambda x: x.split(',')) \
+        .map(lambda x: (x[3], (x[6], x[7], x[4], x[5], x[2], x[0]))) \
+        .groupByKey() \
+        .map(lambda x: [x[0], list(x[1])]) \
+        .map(lambda x: [x[0], set(x[1][0])]) \
+        .map(createNewForm)\
+        .collect()
+
+    # .map(lambda x: len(x)) \
+    return q0
+
+def count(rows):
+    return rows.length
+
+if __name__ == "__main__":
+    inputPath = 'ndata/before_concat'
+    # inputPath = 'instance.csv'
+    outputPath = 'removed_employee_data.csv'
+    res = simple_task(inputPath)
+    print('finished')
+
+    with open(outputPath, 'w') as f:
+        for row in res:
+            f.write(str(row) + '\n')

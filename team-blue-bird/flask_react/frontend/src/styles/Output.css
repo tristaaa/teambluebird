@@ -1,0 +1,24 @@
+.map-btn{
+    margin-bottom: 16px;
+    float: left;
+    margin-left: 15px;
+}
+.assign-table{
+    margin-top: 10px;
+}
+
+.main {
+    margin-top: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 960px;
+    border: 0;
+}
+
+.back_button{
+    float: left;
+    padding-left: 0;
+    font-size: 16px;
+}
+.back_button{
+}

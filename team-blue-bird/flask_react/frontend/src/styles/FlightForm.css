@@ -1,0 +1,37 @@
+.main {
+    margin-top: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 960px;
+    border: 0;
+}
+.editable-cell {
+    position: relative;
+}
+
+.editable-cell-value-wrap {
+    padding: 5px 12px;
+    cursor: pointer;
+}
+
+.editable-row:hover .editable-cell-value-wrap {
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    padding: 4px 11px;
+}
+
+.add-btn{
+    margin-bottom: 16px;
+    float: left;
+    margin-left: 15px;
+}
+
+.input-form{
+    width: 500px;
+}
+
+[data-theme='dark'] .editable-row:hover .editable-cell-value-wrap {
+    border: 1px solid #434343;
+}
+
+.upload{float: right;}
